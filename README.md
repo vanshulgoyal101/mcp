@@ -72,10 +72,11 @@ mcp/
 │   └── security.ts   # SSRF guard (block private/internal addresses)
 ├── public/
 │   ├── index.html    # landing page (served for non-API paths)
-│   ├── og.svg        # social share image
+│   ├── og.png        # social share image (1200×630)
+│   ├── og.svg        # social image source
 │   ├── robots.txt
 │   └── sitemap.xml
-├── tests/            # vitest: security, extract, mcp dispatch, worker
+├── tests/            # vitest: security, extract, search, mcp dispatch, fetcher, worker
 ├── wrangler.toml
 ├── package.json
 ├── tsconfig.json

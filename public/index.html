@@ -6,8 +6,8 @@
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0c0d12">
 <title>MCP Web Reader — Read Any URL as Clean Markdown for AI Agents | mcp.vanshul.com</title>
-<meta name="description" content="Free public Model Context Protocol (MCP) server that turns any web page into clean Markdown for AI agents. Fetch Markdown, metadata and links over Streamable HTTP. Works with Claude, Cursor, Continue and any MCP client. SSRF-safe, no API key, no data stored.">
-<meta name="keywords" content="MCP server, Model Context Protocol, web to markdown, url to markdown, AI agent tools, Claude MCP, Cursor MCP, fetch markdown, web reader, Readability, Streamable HTTP, remote MCP server">
+<meta name="description" content="Free public Model Context Protocol (MCP) server that turns any web page into clean Markdown for AI agents. Fetch Markdown, search a page, pull metadata and links over Streamable HTTP. Works with Claude, Cursor, Continue and any MCP client. SSRF-safe, no API key, no data stored.">
+<meta name="keywords" content="MCP server, Model Context Protocol, web to markdown, url to markdown, AI agent tools, Claude MCP, Cursor MCP, fetch markdown, search web page, web reader, Readability, Streamable HTTP, remote MCP server">
 <meta name="author" content="Vanshul">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <link rel="canonical" href="https://mcp.vanshul.com/">
@@ -18,15 +18,19 @@
 <meta property="og:site_name" content="mcp.vanshul.com">
 <meta property="og:url" content="https://mcp.vanshul.com/">
 <meta property="og:title" content="MCP Web Reader — Read Any URL as Clean Markdown for AI Agents">
-<meta property="og:description" content="A free public MCP server that turns any web page into clean Markdown for AI agents. Works with Claude, Cursor, Continue and any MCP client. SSRF-safe, no API key.">
-<meta property="og:image" content="https://mcp.vanshul.com/og.svg">
+<meta property="og:description" content="A free public MCP server that turns any web page into clean Markdown for AI agents. Fetch, search, and extract links from any page. Works with Claude, Cursor, Continue. SSRF-safe, no API key.">
+<meta property="og:image" content="https://mcp.vanshul.com/og.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="mcp.vanshul.com — read the web as Markdown for AI agents">
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="MCP Web Reader — Read Any URL as Clean Markdown for AI Agents">
 <meta name="twitter:description" content="Free public MCP server that turns any web page into clean Markdown for AI agents. Works with Claude, Cursor, Continue and any MCP client.">
-<meta name="twitter:image" content="https://mcp.vanshul.com/og.svg">
+<meta name="twitter:image" content="https://mcp.vanshul.com/og.png">
+<meta name="twitter:image:alt" content="mcp.vanshul.com — read the web as Markdown for AI agents">
 <style>
   :root{--bg:#0c0d12;--panel:#14161d;--panel-2:#191c25;--line:#262a36;--text:#f2f4f9;--muted:#949cb0;--accent:#34d399;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
   *{box-sizing:border-box}
@@ -74,6 +78,7 @@
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
       "featureList": [
         "fetch_markdown — page main content as clean Markdown",
+        "search_page — only the passages of a page that match a query, ranked by relevance",
         "fetch_metadata — title, byline, site name, excerpt, word count",
         "extract_links — all outbound http(s) links with anchor text"
       ],
@@ -119,7 +124,7 @@
           "name": "What tools does the server expose?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Three: fetch_markdown (main content as Markdown, with an optional max_chars budget), fetch_metadata (title, byline, site name, excerpt and word count) and extract_links (all outbound links with anchor text)."
+            "text": "Four: fetch_markdown (main content as Markdown, with an optional max_chars budget), search_page (only the passages matching a query, ranked by relevance), fetch_metadata (title, byline, site name, excerpt and word count) and extract_links (all outbound links with anchor text)."
           }
         }
       ]
@@ -139,6 +144,7 @@
   <h2>Tools</h2>
   <div class="card">
     <div class="tool"><b>fetch_markdown</b> — fetch a page and return its main article as clean Markdown (nav, ads and boilerplate stripped out). Optional <code>max_chars</code> truncates the result to fit a context budget.</div>
+    <div class="tool"><b>search_page</b> — return only the passages of a page that match a query, each with its heading breadcrumb and ranked by relevance. Finds a detail while spending far fewer tokens than fetching the whole page.</div>
     <div class="tool"><b>fetch_metadata</b> — return a page's title, byline, site name, excerpt and word count as JSON.</div>
     <div class="tool"><b>extract_links</b> — return all outbound links on a page (with anchor text) for crawling.</div>
   </div>
@@ -180,6 +186,7 @@
     <ul>
       <li><b>Give an AI agent live web access</b> — let Claude, Cursor or Continue read the current version of an article or docs page instead of a stale training snapshot.</li>
       <li><b>Research &amp; summarisation</b> — pull clean Markdown into a prompt without the nav, ads and cookie banners that waste tokens.</li>
+      <li><b>Pinpoint a detail</b> — use <code>search_page</code> to return just the passages matching a query (e.g. pricing, a config flag) instead of the whole page.</li>
       <li><b>Lightweight crawling</b> — use <code>extract_links</code> to walk a site and follow related pages.</li>
       <li><b>Metadata enrichment</b> — grab a page's title, byline and excerpt for citations or link previews.</li>
     </ul>
@@ -191,7 +198,7 @@
     <p><b>Which MCP clients can connect?</b><br>Any client that supports remote / Streamable-HTTP MCP servers — Claude Desktop, Cursor, Continue and more. Point it at <code>https://mcp.vanshul.com/mcp</code>, or bridge stdio-only clients with <code>npx mcp-remote</code>.</p>
     <p><b>Does it need an API key or store my data?</b><br>No key, and no page content is stored. Extraction is deterministic (Mozilla Readability + Turndown) with no LLM in the loop.</p>
     <p><b>Is it safe against SSRF?</b><br>Yes — only public <code>http(s)</code> URLs are allowed; localhost, private ranges and cloud metadata are blocked and every redirect hop is re-validated. Requests are rate-limited and page size is capped.</p>
-    <p><b>What tools does it expose?</b><br><code>fetch_markdown</code> (with an optional <code>max_chars</code> budget), <code>fetch_metadata</code> and <code>extract_links</code>.</p>
+    <p><b>What tools does it expose?</b><br><code>fetch_markdown</code> (with an optional <code>max_chars</code> budget), <code>search_page</code> (relevance-ranked passages matching a query), <code>fetch_metadata</code> and <code>extract_links</code>.</p>
   </div>
 
   <footer>
