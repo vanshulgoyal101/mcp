@@ -111,6 +111,32 @@ describe('handleRpc — tools/call', () => {
     expect(payload.links.map((l: { href: string }) => l.href)).toContain('https://out.example/page');
   });
 
+  it('search_page returns only passages matching the query', async () => {
+    stubFetchHtml();
+    const res = (await handleRpc({
+      jsonrpc: '2.0',
+      id: 81,
+      method: 'tools/call',
+      params: { name: 'search_page', arguments: { url: 'https://example.com/post', query: 'reasonably long' } },
+    })) as any;
+    const payload = JSON.parse(res.result.content[0].text);
+    expect(payload.query).toBe('reasonably long');
+    expect(payload.count).toBeGreaterThan(0);
+    expect(payload.matches[0].snippet).toMatch(/reasonably long/i);
+  });
+
+  it('search_page reports a missing query as a recoverable tool error', async () => {
+    stubFetchHtml();
+    const res = (await handleRpc({
+      jsonrpc: '2.0',
+      id: 82,
+      method: 'tools/call',
+      params: { name: 'search_page', arguments: { url: 'https://example.com/post', query: '   ' } },
+    })) as any;
+    expect(res.result.isError).toBe(true);
+    expect(res.result.content[0].text).toMatch(/query/i);
+  });
+
   it('reports an unknown tool as a JSON-RPC error', async () => {
     const res = (await handleRpc({
       jsonrpc: '2.0',
