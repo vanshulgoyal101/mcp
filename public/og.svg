@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="mcp.vanshul.com — read the web as Markdown for AI agents">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#15181f"/>
+      <stop offset="1" stop-color="#0c0d12"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="1" y="1" width="1198" height="628" fill="none" stroke="#262a36" stroke-width="2"/>
+  <text x="80" y="150" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="64">🤖</text>
+  <text x="170" y="152" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="44" fill="#34d399">mcp.vanshul.com</text>
+  <text x="80" y="300" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="76" font-weight="700" fill="#f2f4f9">Read the web as</text>
+  <text x="80" y="392" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="76" font-weight="700" fill="#34d399">clean Markdown</text>
+  <text x="80" y="470" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="34" fill="#949cb0">A public Model Context Protocol server for AI agents</text>
+  <text x="80" y="540" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="26" fill="#949cb0">fetch_markdown · fetch_metadata · extract_links</text>
+</svg>

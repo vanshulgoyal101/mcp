@@ -1,0 +1,37 @@
+{
+  "name": "vanshul-mcp",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A public MCP server on Cloudflare Workers that lets AI agents read the live web as clean Markdown (Readability + Turndown), over the Streamable HTTP transport.",
+  "license": "MIT",
+  "author": "Vanshul Goyal",
+  "homepage": "https://mcp.vanshul.com",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "cloudflare-workers",
+    "web-scraping",
+    "markdown",
+    "readability",
+    "ai-agents"
+  ],
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@mozilla/readability": "^0.5.0",
+    "linkedom": "^0.18.5",
+    "turndown": "^7.2.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260702.1",
+    "@types/turndown": "^5.0.5",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8",
+    "wrangler": "^3.90.0"
+  }
+}

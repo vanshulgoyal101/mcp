@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0c0d12">
+<title>MCP Web Reader — Read Any URL as Clean Markdown for AI Agents | mcp.vanshul.com</title>
+<meta name="description" content="Free public Model Context Protocol (MCP) server that turns any web page into clean Markdown for AI agents. Fetch Markdown, metadata and links over Streamable HTTP. Works with Claude, Cursor, Continue and any MCP client. SSRF-safe, no API key, no data stored.">
+<meta name="keywords" content="MCP server, Model Context Protocol, web to markdown, url to markdown, AI agent tools, Claude MCP, Cursor MCP, fetch markdown, web reader, Readability, Streamable HTTP, remote MCP server">
+<meta name="author" content="Vanshul">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://mcp.vanshul.com/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A4%96%3C/text%3E%3C/svg%3E">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="mcp.vanshul.com">
+<meta property="og:url" content="https://mcp.vanshul.com/">
+<meta property="og:title" content="MCP Web Reader — Read Any URL as Clean Markdown for AI Agents">
+<meta property="og:description" content="A free public MCP server that turns any web page into clean Markdown for AI agents. Works with Claude, Cursor, Continue and any MCP client. SSRF-safe, no API key.">
+<meta property="og:image" content="https://mcp.vanshul.com/og.svg">
+<meta property="og:image:alt" content="mcp.vanshul.com — read the web as Markdown for AI agents">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MCP Web Reader — Read Any URL as Clean Markdown for AI Agents">
+<meta name="twitter:description" content="Free public MCP server that turns any web page into clean Markdown for AI agents. Works with Claude, Cursor, Continue and any MCP client.">
+<meta name="twitter:image" content="https://mcp.vanshul.com/og.svg">
+<style>
+  :root{--bg:#0c0d12;--panel:#14161d;--panel-2:#191c25;--line:#262a36;--text:#f2f4f9;--muted:#949cb0;--accent:#34d399;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,#15181f,var(--bg));color:var(--text);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:0 18px 60px}
+  .wrap{max-width:760px;margin:0 auto}
+  header{text-align:center;padding:56px 0 20px}
+  h1{margin:0;font-size:clamp(1.8rem,6vw,2.6rem);letter-spacing:-.02em}
+  .tag{color:var(--muted);font-size:1.05rem}
+  .endpoint{display:inline-block;margin-top:14px;font-family:var(--mono);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:10px 16px;color:var(--accent)}
+  h2{margin:34px 0 10px;font-size:1.2rem}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:14px 0}
+  code,pre{font-family:var(--mono)}
+  pre{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto;font-size:.85rem}
+  .tool{border-left:3px solid var(--accent);padding-left:12px;margin:10px 0}
+  .tool b{color:var(--accent)}
+  a{color:var(--accent)}
+  footer{text-align:center;color:var(--muted);margin-top:40px;font-size:.85rem}
+  ul{padding-left:20px}
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://mcp.vanshul.com/#website",
+      "url": "https://mcp.vanshul.com/",
+      "name": "MCP Web Reader",
+      "description": "A public Model Context Protocol server that turns any URL into clean Markdown for AI agents.",
+      "publisher": { "@id": "https://mcp.vanshul.com/#person" }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://mcp.vanshul.com/#person",
+      "name": "Vanshul",
+      "url": "https://vanshul.com"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "MCP Web Reader",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Any (remote HTTP)",
+      "url": "https://mcp.vanshul.com/",
+      "description": "A public Model Context Protocol (MCP) server that fetches any web page and returns its main content as clean Markdown, plus metadata and outbound links. Streamable HTTP transport, SSRF-safe, no API key required.",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "featureList": [
+        "fetch_markdown — page main content as clean Markdown",
+        "fetch_metadata — title, byline, site name, excerpt, word count",
+        "extract_links — all outbound http(s) links with anchor text"
+      ],
+      "author": { "@id": "https://mcp.vanshul.com/#person" }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is the MCP Web Reader server?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "It is a free, public Model Context Protocol (MCP) server that fetches any web page and returns its main content as clean Markdown, plus metadata and outbound links. AI agents connect to it over the Streamable HTTP transport to read the live web."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which MCP clients can connect to it?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Any client that supports remote / Streamable-HTTP MCP servers, including Claude Desktop, Cursor and Continue. Point the client at https://mcp.vanshul.com/mcp. Stdio-only clients can bridge with npx mcp-remote."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does it require an API key or store my data?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. There is no API key and no page content is stored. Extraction is deterministic (Mozilla Readability + Turndown) with no LLM in the loop."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is it safe against SSRF?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Only public http(s) URLs are allowed. localhost, private IP ranges and cloud metadata endpoints are blocked, and every redirect hop is re-validated. Requests are rate-limited and page size is capped."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What tools does the server expose?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Three: fetch_markdown (main content as Markdown, with an optional max_chars budget), fetch_metadata (title, byline, site name, excerpt and word count) and extract_links (all outbound links with anchor text)."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🤖 mcp.vanshul.com</h1>
+    <p class="tag">A public <b>Model Context Protocol</b> server that turns any URL into clean Markdown — so your AI agent can read the live web.</p>
+    <div class="endpoint">https://mcp.vanshul.com/mcp</div>
+  </header>
+
+  <h2>Tools</h2>
+  <div class="card">
+    <div class="tool"><b>fetch_markdown</b> — fetch a page and return its main article as clean Markdown (nav, ads and boilerplate stripped out). Optional <code>max_chars</code> truncates the result to fit a context budget.</div>
+    <div class="tool"><b>fetch_metadata</b> — return a page's title, byline, site name, excerpt and word count as JSON.</div>
+    <div class="tool"><b>extract_links</b> — return all outbound links on a page (with anchor text) for crawling.</div>
+  </div>
+
+  <h2>Connect it</h2>
+  <div class="card">
+    <p>Add it to any MCP client that supports remote / Streamable-HTTP servers. For example, in a client config:</p>
+    <pre>{
+  "mcpServers": {
+    "web-reader": {
+      "url": "https://mcp.vanshul.com/mcp"
+    }
+  }
+}</pre>
+    <p>For clients that only speak stdio, bridge with <a href="https://github.com/modelcontextprotocol/servers">mcp-remote</a>:</p>
+    <pre>npx mcp-remote https://mcp.vanshul.com/mcp</pre>
+  </div>
+
+  <h2>Try it with curl</h2>
+  <div class="card">
+    <pre>curl -s https://mcp.vanshul.com/mcp \
+  -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call",
+       "params":{"name":"fetch_markdown",
+                 "arguments":{"url":"https://example.com"}}}'</pre>
+  </div>
+
+  <h2>Notes</h2>
+  <div class="card">
+    <ul>
+      <li>Extraction is deterministic (Mozilla Readability + Turndown) — no LLM, no data stored.</li>
+      <li>Only public <code>http(s)</code> URLs; private/internal addresses are blocked (SSRF-safe).</li>
+      <li>Requests are rate-limited and page size is capped.</li>
+    </ul>
+  </div>
+
+  <h2>Use cases</h2>
+  <div class="card">
+    <ul>
+      <li><b>Give an AI agent live web access</b> — let Claude, Cursor or Continue read the current version of an article or docs page instead of a stale training snapshot.</li>
+      <li><b>Research &amp; summarisation</b> — pull clean Markdown into a prompt without the nav, ads and cookie banners that waste tokens.</li>
+      <li><b>Lightweight crawling</b> — use <code>extract_links</code> to walk a site and follow related pages.</li>
+      <li><b>Metadata enrichment</b> — grab a page's title, byline and excerpt for citations or link previews.</li>
+    </ul>
+  </div>
+
+  <h2>FAQ</h2>
+  <div class="card">
+    <p><b>What is the MCP Web Reader server?</b><br>A free, public Model Context Protocol server that fetches any web page and returns its main content as clean Markdown, plus metadata and outbound links, over the Streamable HTTP transport.</p>
+    <p><b>Which MCP clients can connect?</b><br>Any client that supports remote / Streamable-HTTP MCP servers — Claude Desktop, Cursor, Continue and more. Point it at <code>https://mcp.vanshul.com/mcp</code>, or bridge stdio-only clients with <code>npx mcp-remote</code>.</p>
+    <p><b>Does it need an API key or store my data?</b><br>No key, and no page content is stored. Extraction is deterministic (Mozilla Readability + Turndown) with no LLM in the loop.</p>
+    <p><b>Is it safe against SSRF?</b><br>Yes — only public <code>http(s)</code> URLs are allowed; localhost, private ranges and cloud metadata are blocked and every redirect hop is re-validated. Requests are rate-limited and page size is capped.</p>
+    <p><b>What tools does it expose?</b><br><code>fetch_markdown</code> (with an optional <code>max_chars</code> budget), <code>fetch_metadata</code> and <code>extract_links</code>.</p>
+  </div>
+
+  <footer>
+    Built by <a href="https://vanshul.com">Vanshul</a> ·
+    <a href="https://links.vanshul.com">more projects</a> ·
+    sibling of <a href="https://reader.vanshul.com">reader.vanshul.com</a>
+  </footer>
+</div>
+<script defer src="https://vanshul.com/a.js" data-site="mcp"></script>
+</body>
+</html>
