@@ -89,7 +89,7 @@ mcp/
 cd mcp
 npm install
 npm run typecheck
-npm test          # vitest — security, extraction, MCP dispatch, worker routing
+npm test          # vitest — security, extraction, search, MCP dispatch, fetcher, worker
 npm run dev        # local worker at http://localhost:8787  (POST /mcp)
 npm run deploy     # wrangler deploy
 ```
@@ -113,6 +113,13 @@ Implements `initialize`, `ping`, `tools/list`, `tools/call` and notifications
 (protocol version `2025-06-18`). Tool failures are returned as
 `{ content, isError: true }` so the agent can read the message and recover;
 malformed requests use standard JSON-RPC error codes.
+
+## Documentation
+
+- [docs/architecture.md](docs/architecture.md) — modules, request lifecycle, extraction pipeline, limits
+- [docs/tools.md](docs/tools.md) — full tool & JSON-RPC API reference with examples
+- [docs/security.md](docs/security.md) — SSRF threat model and mitigations
+- [docs/deployment.md](docs/deployment.md) — Cloudflare Worker + custom-domain deploy guide
 
 ## License
 
