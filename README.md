@@ -1,5 +1,8 @@
 # mcp.vanshul.com
 
+[![MCP Registry](https://img.shields.io/badge/MCP_Registry-io.github.vanshulgoyal101%2Fmcp-34d399)](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.vanshulgoyal101/mcp)
+[![Endpoint](https://img.shields.io/badge/endpoint-mcp.vanshul.com%2Fmcp-34d399)](https://mcp.vanshul.com/mcp)
+
 A public **Model Context Protocol (MCP)** server, running as a Cloudflare
 Worker, that lets any AI agent read the live web as clean Markdown. It builds on
 the same extraction pipeline as the sibling [`reader/`](../../reader) project
