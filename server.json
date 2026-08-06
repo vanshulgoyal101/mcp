@@ -1,0 +1,17 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.json",
+  "name": "io.github.vanshulgoyal101/mcp",
+  "description": "Read the live web as clean Markdown for AI agents: fetch a page as Markdown, search it for the relevant passages, pull metadata, or extract links. SSRF-safe, no API key.",
+  "version": "1.0.0",
+  "repository": {
+    "url": "https://github.com/vanshulgoyal101/mcp",
+    "source": "github"
+  },
+  "websiteUrl": "https://mcp.vanshul.com",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.vanshul.com/mcp"
+    }
+  ]
+}
