@@ -43,6 +43,18 @@ Stdio-only clients can bridge with `mcp-remote`:
 npx mcp-remote https://mcp.vanshul.com/mcp
 ```
 
+### Add it to your client
+
+- **Cursor** — Settings → MCP → Add new server, or drop this into `~/.cursor/mcp.json`:
+  ```json
+  { "mcpServers": { "web-reader": { "url": "https://mcp.vanshul.com/mcp" } } }
+  ```
+- **Claude Desktop** — add the same block to `claude_desktop_config.json` (Settings → Developer → Edit Config). If your version is stdio-only, use:
+  ```json
+  { "mcpServers": { "web-reader": { "command": "npx", "args": ["mcp-remote", "https://mcp.vanshul.com/mcp"] } } }
+  ```
+- **Continue / VS Code** — add `web-reader` with URL `https://mcp.vanshul.com/mcp` to your MCP servers config.
+
 ## Try it with curl
 
 ```sh
