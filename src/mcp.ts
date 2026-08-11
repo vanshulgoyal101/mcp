@@ -41,7 +41,7 @@ const TOOLS: ToolDef[] = [
   {
     name: 'fetch_markdown',
     description:
-      'Fetch a web page and return its main content as clean Markdown (nav, ads and boilerplate removed). Use this to read an article or documentation page.',
+      'Fetch a web page and return its main content as clean Markdown (nav, ads and boilerplate removed). Raw Markdown, plain-text and JSON endpoints are returned as-is. Use this to read an article, docs page or raw file.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -54,10 +54,8 @@ const TOOLS: ToolDef[] = [
       required: ['url'],
     },
     async run(args) {
-      const html = await loadHtml(args.url);
-      const result = extract(html.body, html.url);
-      const markdown = result.markdown || '(no readable content)';
-      return truncate(markdown, args.max_chars);
+      const page = await loadPage(args.url);
+      return truncate(pageText(page), args.max_chars);
     },
   },
   {
@@ -66,10 +64,14 @@ const TOOLS: ToolDef[] = [
       'Fetch a web page and return its metadata as JSON: title, byline, site name, excerpt and word count (no full body).',
     inputSchema: urlSchema,
     async run(args) {
-      const html = await loadHtml(args.url);
-      const { markdown, ...meta } = extract(html.body, html.url);
+      const page = await loadPage(args.url);
+      if (!isHtml(page.contentType)) {
+        const wordCount = page.body.match(/\S+/g)?.length ?? 0;
+        return JSON.stringify({ url: page.url, contentType: page.contentType || null, title: null, wordCount }, null, 2);
+      }
+      const { markdown, ...meta } = extract(page.body, page.url);
       void markdown;
-      return JSON.stringify({ url: html.url, ...meta }, null, 2);
+      return JSON.stringify({ url: page.url, ...meta }, null, 2);
     },
   },
   {
@@ -85,10 +87,10 @@ const TOOLS: ToolDef[] = [
       required: ['url'],
     },
     async run(args) {
-      const html = await loadHtml(args.url);
+      const page = await loadPage(args.url);
       const limit = typeof args.limit === 'number' ? Math.max(1, Math.min(500, args.limit)) : 200;
-      const links = extractLinks(html.body, html.url, limit);
-      return JSON.stringify({ url: html.url, count: links.length, links }, null, 2);
+      const links = extractLinks(page.body, page.url, limit);
+      return JSON.stringify({ url: page.url, count: links.length, links }, null, 2);
     },
   },
   {
@@ -109,17 +111,17 @@ const TOOLS: ToolDef[] = [
       if (typeof args.query !== 'string' || args.query.trim() === '') {
         throw new ToolError('The "query" argument is required and must be a non-empty string.');
       }
-      const html = await loadHtml(args.url);
-      const { markdown } = extract(html.body, html.url);
+      const page = await loadPage(args.url);
+      const text = pageText(page);
       const maxMatches = typeof args.max_matches === 'number' ? args.max_matches : undefined;
       const contextChars = typeof args.context_chars === 'number' ? args.context_chars : undefined;
-      const matches = searchMarkdown(markdown, args.query, maxMatches, contextChars);
-      return JSON.stringify({ url: html.url, query: args.query, count: matches.length, matches }, null, 2);
+      const matches = searchMarkdown(text, args.query, maxMatches, contextChars);
+      return JSON.stringify({ url: page.url, query: args.query, count: matches.length, matches }, null, 2);
     },
   },
 ];
 
-async function loadHtml(rawUrl: unknown): Promise<{ url: string; body: string }> {
+async function loadPage(rawUrl: unknown): Promise<LoadedPage> {
   if (typeof rawUrl !== 'string') throw new ToolError('The "url" argument is required and must be a string.');
   const check = validateTargetUrl(rawUrl);
   if (!check.ok || !check.url) throw new ToolError(check.reason ?? 'Invalid url');
@@ -127,11 +129,37 @@ async function loadHtml(rawUrl: unknown): Promise<{ url: string; body: string }>
   const res = await fetchPage(check.url);
   if (!res.ok) throw new ToolError(`Upstream returned ${res.status}`);
   const contentType = res.headers.get('content-type') ?? '';
-  if (!contentType.includes('html')) throw new ToolError(`Page is not HTML (got ${contentType || 'unknown'})`);
+  if (isBinaryType(contentType)) throw new ToolError(`Page is not a text or HTML document (got ${contentType})`);
 
   const body = await readCapped(res, MAX_BYTES);
   if (body === null) throw new ToolError('Page is too large to process');
-  return { url: check.url.toString(), body };
+  return { url: check.url.toString(), body, contentType };
+}
+
+interface LoadedPage {
+  url: string;
+  body: string;
+  contentType: string;
+}
+
+function isHtml(contentType: string): boolean {
+  return contentType.includes('html');
+}
+
+/** Reject clearly-binary responses; allow HTML, text/*, JSON, XML and unknown types. */
+function isBinaryType(contentType: string): boolean {
+  if (!contentType) return false;
+  return (
+    /^(image|audio|video|font)\//.test(contentType) ||
+    /application\/(octet-stream|pdf|zip|gzip|x-tar|x-7z-compressed|wasm)/.test(contentType)
+  );
+}
+
+/** Readable text of a page: extracted Markdown for HTML, the raw body otherwise. */
+function pageText(page: LoadedPage): string {
+  return isHtml(page.contentType)
+    ? extract(page.body, page.url).markdown || '(no readable content)'
+    : page.body.trim();
 }
 
 class ToolError extends Error {}

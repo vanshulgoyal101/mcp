@@ -1,0 +1,26 @@
+# mcp.vanshul.com
+
+> A public Model Context Protocol (MCP) server that lets any AI agent read the live web as clean Markdown. SSRF-safe, no API key, no data stored. Endpoint: https://mcp.vanshul.com/mcp (JSON-RPC 2.0 over Streamable HTTP).
+
+## Tools
+
+- fetch_markdown: Fetch a page and return its main content as clean Markdown. Raw Markdown/text/JSON endpoints are returned as-is. Args: url, max_chars?
+- search_page: Return only the passages of a page that match a query, ranked by relevance, with heading breadcrumbs. Args: url, query, max_matches?, context_chars?
+- fetch_metadata: Return a page's title, byline, site name, excerpt and word count as JSON. Args: url
+- extract_links: Return all outbound http(s) links on a page with anchor text. Args: url, limit?
+
+## Connect
+
+- Config: { "mcpServers": { "web-reader": { "url": "https://mcp.vanshul.com/mcp" } } }
+- Stdio bridge: npx mcp-remote https://mcp.vanshul.com/mcp
+
+## Notes
+
+- Deterministic extraction (Mozilla Readability + Turndown), no LLM in the loop.
+- SSRF-safe: only public http(s) URLs; private/internal addresses and every redirect hop are blocked.
+- Bounded: 10s timeout, ~3 MB page cap, per-IP rate limit.
+
+## Links
+
+- Source: https://github.com/vanshulgoyal101/mcp
+- Sibling: https://ctx.vanshul.com (GitHub repo & docs → agent context)

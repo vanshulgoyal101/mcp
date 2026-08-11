@@ -158,21 +158,49 @@ describe('handleRpc — tools/call', () => {
     expect(res.result.content[0].text).toMatch(/private or reserved/i);
   });
 
-  it('rejects a non-HTML upstream response as a tool error', async () => {
+  it('returns raw text/JSON endpoints as-is (not just HTML)', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn(
-        async () =>
-          new Response('{"ok":true}', { status: 200, headers: { 'content-type': 'application/json' } }),
-      ),
+      vi.fn(async () => new Response('# Raw Markdown\n\nhello', { status: 200, headers: { 'content-type': 'text/markdown' } })),
     );
     const res = (await handleRpc({
       jsonrpc: '2.0',
       id: 11,
       method: 'tools/call',
-      params: { name: 'fetch_markdown', arguments: { url: 'https://example.com/data.json' } },
+      params: { name: 'fetch_markdown', arguments: { url: 'https://raw.example/readme.md' } },
+    })) as any;
+    expect(res.result.isError).toBeUndefined();
+    expect(res.result.content[0].text).toContain('# Raw Markdown');
+  });
+
+  it('fetch_metadata on a non-HTML page returns contentType + wordCount', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('{"a":1,"b":2}', { status: 200, headers: { 'content-type': 'application/json' } })),
+    );
+    const res = (await handleRpc({
+      jsonrpc: '2.0',
+      id: 12,
+      method: 'tools/call',
+      params: { name: 'fetch_metadata', arguments: { url: 'https://api.example/data.json' } },
+    })) as any;
+    const meta = JSON.parse(res.result.content[0].text);
+    expect(meta.contentType).toContain('json');
+    expect(meta.wordCount).toBeGreaterThan(0);
+  });
+
+  it('rejects a binary response (image) as a tool error', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('\x89PNG', { status: 200, headers: { 'content-type': 'image/png' } })),
+    );
+    const res = (await handleRpc({
+      jsonrpc: '2.0',
+      id: 13,
+      method: 'tools/call',
+      params: { name: 'fetch_markdown', arguments: { url: 'https://example.com/logo.png' } },
     })) as any;
     expect(res.result.isError).toBe(true);
-    expect(res.result.content[0].text).toMatch(/not HTML/i);
+    expect(res.result.content[0].text).toMatch(/not a text or HTML/i);
   });
 });

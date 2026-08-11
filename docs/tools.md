@@ -25,6 +25,8 @@ batch produce no response.
 ### `fetch_markdown`
 
 Fetch a page and return its main content as clean Markdown (nav, ads and boilerplate removed).
+Raw Markdown, plain-text and JSON endpoints (e.g. `raw.githubusercontent.com`) are returned
+as-is; clearly-binary responses (images, PDFs, archives) are rejected.
 
 | Argument | Type | Required | Description |
 | --- | --- | --- | --- |
