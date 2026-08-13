@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
-Disallow: /mcp
+# /mcp is the JSON-RPC endpoint; a crawler GET just gets a 405 "use POST", so
+# it's safe to let bots (and MCP-aware agents) discover it.
 Disallow: /health
 
 Sitemap: https://mcp.vanshul.com/sitemap.xml
