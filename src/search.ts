@@ -43,7 +43,7 @@ export function searchMarkdown(
   const budget = clamp(contextChars, 50, 4000);
 
   const headings: (string | null)[] = new Array(MAX_HEADING_LEVEL + 1).fill(null);
-  const matches: Array<SearchMatch & { order: number }> = [];
+  const matches: Array<SearchMatch & { order: number; coverage: number }> = [];
   let order = 0;
 
   for (const block of splitBlocks(markdown)) {
@@ -54,19 +54,22 @@ export function searchMarkdown(
       continue;
     }
 
-    const score = scoreBlock(block, terms);
+    const { score, coverage } = scoreBlock(block, terms);
     if (score > 0) {
       matches.push({
         heading: breadcrumb(headings),
         snippet: windowAround(block, terms, budget),
         score,
+        coverage,
         order: order++,
       });
     }
   }
 
-  matches.sort((a, b) => b.score - a.score || a.order - b.order);
-  return matches.slice(0, limit).map(({ order: _order, ...m }) => m);
+  // Coverage first: a passage matching more distinct query terms is more relevant
+  // than one repeating a single term; break ties by occurrences, then document order.
+  matches.sort((a, b) => b.coverage - a.coverage || b.score - a.score || a.order - b.order);
+  return matches.slice(0, limit).map(({ order: _order, coverage: _coverage, ...m }) => m);
 }
 
 function tokenize(query: string): string[] {
@@ -99,19 +102,23 @@ function breadcrumb(headings: (string | null)[]): string | null {
 }
 
 /** Count case-insensitive occurrences of each term across the block. */
-function scoreBlock(block: string, terms: string[]): number {
+function scoreBlock(block: string, terms: string[]): { score: number; coverage: number } {
   const hay = block.toLowerCase();
   let score = 0;
+  let coverage = 0;
   for (const term of terms) {
+    let count = 0;
     let from = 0;
     for (;;) {
       const at = hay.indexOf(term, from);
       if (at === -1) break;
-      score++;
+      count++;
       from = at + term.length;
     }
+    if (count > 0) coverage++;
+    score += count;
   }
-  return score;
+  return { score, coverage };
 }
 
 /**

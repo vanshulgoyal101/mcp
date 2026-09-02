@@ -29,6 +29,12 @@ describe('searchMarkdown', () => {
     }
   });
 
+  it('ranks passages covering more query terms above ones repeating a single term', () => {
+    const md = 'token token token token token\n\nthe session uses a single token here';
+    const [top] = searchMarkdown(md, 'session token', 5);
+    expect(top.snippet).toContain('session'); // coverage 2 beats the 5× "token" block
+  });
+
   it('tags each match with its heading breadcrumb', () => {
     const matches = searchMarkdown(DOC, 'Pro plan');
     expect(matches[0].heading).toBe('Product › Pricing');

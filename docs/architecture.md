@@ -37,7 +37,7 @@ flowchart TD
 | `worker.ts` | HTTP entry point. Routes `/mcp`, `/health` and static assets; CORS; per-isolate rate limit; JSON-RPC batch handling. |
 | `mcp.ts` | JSON-RPC 2.0 dispatch (`initialize`, `ping`, `tools/list`, `tools/call`) and the four tool definitions. |
 | `extract.ts` | HTML → Markdown / links via linkedom + Mozilla Readability + Turndown. |
-| `search.ts` | `searchMarkdown` — query-focused, relevance-ranked passage search over extracted Markdown. |
+| `search.ts` | `searchMarkdown` — query-focused, relevance-ranked passage search over extracted Markdown. Coverage-first: passages matching more distinct query terms rank above ones repeating a single term. |
 | `fetcher.ts` | Bounded `fetch`: timeout, size cap, manual redirect following with per-hop re-validation. |
 | `security.ts` | SSRF guard: `validateTargetUrl` + `isPrivateIpLiteral`. |
 
