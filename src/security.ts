@@ -53,17 +53,57 @@ export function isPrivateIpLiteral(host: string): boolean {
   return false;
 }
 
+/**
+ * Parse an IPv4 host in any inet_aton form — dotted-decimal, but also decimal
+ * (`2130706433`), hex (`0x7f000001`), octal (`0177.0.0.1`) and short forms
+ * (`127.1`). These all resolve to real addresses, so parsing them the same way a
+ * fetch stack does closes SSRF bypasses a strict dotted-quad check would miss.
+ */
 function parseIpv4(host: string): [number, number, number, number] | null {
   const parts = host.split('.');
-  if (parts.length !== 4) return null;
-  const nums: number[] = [];
+  if (parts.length < 1 || parts.length > 4) return null;
+
+  const vals: number[] = [];
   for (const p of parts) {
-    if (!/^\d{1,3}$/.test(p)) return null;
-    const n = Number(p);
-    if (n > 255) return null;
-    nums.push(n);
+    const v = parseIpPart(p);
+    if (v === null) return null;
+    vals.push(v);
   }
-  return nums as [number, number, number, number];
+
+  // inet_aton: the last part fills the remaining low bytes; earlier parts are octets.
+  const n = vals.length;
+  const lastMax = [0, 0xffffffff, 0xffffff, 0xffff, 0xff][n];
+  for (let i = 0; i < n - 1; i++) if (vals[i] > 0xff) return null;
+  if (vals[n - 1] > lastMax) return null;
+
+  let addr = vals[n - 1];
+  for (let i = 0; i < n - 1; i++) addr += vals[i] * 2 ** (8 * (3 - i));
+
+  return [
+    Math.floor(addr / 2 ** 24) % 256,
+    Math.floor(addr / 2 ** 16) % 256,
+    Math.floor(addr / 2 ** 8) % 256,
+    addr % 256,
+  ];
+}
+
+/** Parse one IPv4 part with inet_aton base rules (0x = hex, leading 0 = octal). */
+function parseIpPart(part: string): number | null {
+  if (part === '') return null;
+  const s = part.toLowerCase();
+  let base = 10;
+  let digits = s;
+  if (s.startsWith('0x')) {
+    base = 16;
+    digits = s.slice(2);
+  } else if (s.length > 1 && s[0] === '0') {
+    base = 8;
+    digits = s.slice(1);
+  }
+  const ok = base === 16 ? /^[0-9a-f]+$/ : base === 8 ? /^[0-7]+$/ : /^[0-9]+$/;
+  if (digits === '' || !ok.test(digits)) return null;
+  const n = parseInt(digits, base);
+  return Number.isFinite(n) ? n : null;
 }
 
 function isPrivateIpv4([a, b]: [number, number, number, number]): boolean {

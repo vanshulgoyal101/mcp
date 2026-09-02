@@ -37,6 +37,21 @@ describe('validateTargetUrl', () => {
     expect(validateTargetUrl('http://[::1]/').ok).toBe(false);
   });
 
+  it('blocks encoded/short-form loopback IPs (inet_aton SSRF bypasses)', () => {
+    expect(validateTargetUrl('http://2130706433/').ok).toBe(false); // decimal 127.0.0.1
+    expect(validateTargetUrl('http://0x7f000001/').ok).toBe(false); // hex
+    expect(validateTargetUrl('http://0177.0.0.1/').ok).toBe(false); // octal first octet
+    expect(validateTargetUrl('http://127.1/').ok).toBe(false); // short form
+    expect(validateTargetUrl('http://0/').ok).toBe(false); // 0.0.0.0
+    expect(validateTargetUrl('http://3232235777/').ok).toBe(false); // decimal 192.168.0.1
+  });
+
+  it('still allows public IPs and hostnames after normalization', () => {
+    expect(validateTargetUrl('http://8.8.8.8/').ok).toBe(true);
+    expect(validateTargetUrl('http://example.com/').ok).toBe(true);
+    expect(validateTargetUrl('http://134744072/').ok).toBe(true); // decimal 8.8.8.8 (public)
+  });
+
   it('returns the parsed URL for accepted input', () => {
     const check = validateTargetUrl('https://example.com/x');
     expect(check.ok).toBe(true);

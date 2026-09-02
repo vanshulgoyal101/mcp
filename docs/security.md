@@ -31,6 +31,11 @@ rules).
 **Hostnames:** `localhost`, `ip6-localhost`, `ip6-loopback`, and any host ending in
 `.local`, `.internal` or `.localhost`.
 
+**Encoded IPv4:** hosts are parsed with full `inet_aton` rules before the range check,
+so decimal (`2130706433`), hex (`0x7f000001`), octal (`0177.0.0.1`) and short forms
+(`127.1`) all normalise to their real address and are blocked — closing the classic SSRF
+bypass where `http://2130706433/` reaches loopback.
+
 ## Redirect safety
 
 A naive `fetch(url, { redirect: 'follow' })` would let an *allowed* page 302-redirect to
